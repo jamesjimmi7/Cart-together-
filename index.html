@@ -1,0 +1,251 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#f5f7f2">
+  <title>CartTogether | Grocery list</title>
+  <style>
+    :root {
+      --ink: #17231d;
+      --muted: #738078;
+      --paper: #f7f8f4;
+      --surface: #ffffff;
+      --line: #e1e7e1;
+      --green: #1f6f4a;
+      --green-dark: #155438;
+      --mint: #dff1e4;
+      --coral: #e9785b;
+      --yellow: #f8e7a9;
+      --shadow: 0 18px 50px rgba(42, 62, 48, .09);
+      font-family: ui-rounded, "SF Pro Rounded", "Avenir Next", system-ui, sans-serif;
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      color: var(--ink);
+      background: var(--paper);
+      min-height: 100vh;
+    }
+    button, input, select { font: inherit; }
+    button { cursor: pointer; }
+    button:focus-visible, input:focus-visible, select:focus-visible { outline: 3px solid rgba(31,111,74,.25); outline-offset: 2px; }
+
+    .app-shell { max-width: 1120px; margin: 0 auto; padding: 22px 18px 48px; }
+    .topbar { display: flex; align-items: center; justify-content: space-between; gap: 18px; margin-bottom: 34px; }
+    .brand { display: inline-flex; align-items: center; gap: 10px; font-weight: 800; letter-spacing: -.04em; font-size: 1.2rem; }
+    .brand-mark { display: grid; place-items: center; width: 38px; height: 38px; border-radius: 13px; background: var(--green); color: white; box-shadow: 0 6px 14px rgba(31,111,74,.2); }
+    .brand-mark::before { content: "✓"; font-size: 1.15rem; font-weight: 900; }
+    .list-status { color: var(--muted); font-size: .85rem; font-weight: 650; }
+
+    .hero { display: grid; gap: 22px; margin-bottom: 30px; }
+    .eyebrow { color: var(--green); font-weight: 800; letter-spacing: .13em; text-transform: uppercase; font-size: .72rem; margin: 0 0 8px; }
+    h1 { font-size: clamp(2.35rem, 8vw, 4.7rem); letter-spacing: -.075em; line-height: .94; margin: 0; max-width: 680px; }
+    .hero-copy { color: var(--muted); max-width: 460px; line-height: 1.55; margin: 14px 0 0; }
+    .hero-note { justify-self: start; align-self: end; background: var(--yellow); border-radius: 18px; padding: 16px 18px; transform: rotate(1.5deg); box-shadow: 0 9px 0 rgba(234, 207, 128, .32); max-width: 250px; font-size: .9rem; line-height: 1.4; }
+    .hero-note strong { display: block; margin-bottom: 3px; }
+
+    .add-panel { background: var(--surface); border: 1px solid var(--line); box-shadow: var(--shadow); border-radius: 24px; padding: 14px; }
+    .add-row { display: grid; grid-template-columns: 1fr auto; gap: 10px; }
+    .add-row input { border: 0; min-width: 0; padding: 10px 12px; background: transparent; color: var(--ink); font-size: 1.05rem; }
+    .add-row input::placeholder { color: #a4aea7; }
+    .primary-btn { border: 0; border-radius: 15px; color: white; background: var(--green); padding: 12px 19px; font-weight: 800; transition: background .2s, transform .2s; }
+    .primary-btn:hover { background: var(--green-dark); transform: translateY(-1px); }
+    .add-options { display: grid; grid-template-columns: 1fr 1fr; gap: 9px; border-top: 1px solid var(--line); padding-top: 11px; margin-top: 5px; }
+    .field-label { color: var(--muted); font-size: .72rem; font-weight: 800; text-transform: uppercase; letter-spacing: .08em; display: block; margin: 0 0 5px 3px; }
+    .add-options select { width: 100%; border: 1px solid var(--line); border-radius: 11px; color: var(--ink); background: var(--paper); padding: 8px 10px; }
+
+    .content-grid { display: grid; gap: 30px; }
+    .section-heading { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; margin: 0 0 13px; }
+    .section-heading h2 { font-size: 1.15rem; letter-spacing: -.025em; margin: 0; }
+    .section-heading span { color: var(--muted); font-size: .8rem; }
+    .category { margin-bottom: 25px; }
+    .category-title { display: flex; align-items: center; gap: 8px; color: var(--muted); text-transform: uppercase; letter-spacing: .11em; font-size: .72rem; font-weight: 850; margin: 0 0 9px; }
+    .category-title::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: var(--category-color, var(--green)); }
+    .item-list { list-style: none; padding: 0; margin: 0; display: grid; gap: 8px; }
+    .item { display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 11px; min-height: 64px; padding: 10px 11px; border: 1px solid var(--line); border-radius: 16px; background: var(--surface); transition: border-color .2s, opacity .2s, transform .2s; }
+    .item:hover { border-color: #bad1c1; transform: translateX(2px); }
+    .check-btn { width: 26px; height: 26px; border: 2px solid #b8c5bb; border-radius: 50%; background: transparent; color: white; display: grid; place-items: center; padding: 0; font-size: .9rem; transition: all .2s; }
+    .item.is-done .check-btn { background: var(--green); border-color: var(--green); }
+    .item.is-done .check-btn::before { content: "✓"; }
+    .item-main { min-width: 0; }
+    .item-name { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 750; }
+    .item.is-done .item-name { color: #9aa59e; text-decoration: line-through; }
+    .item-meta { color: var(--muted); font-size: .74rem; margin-top: 4px; display: flex; align-items: center; gap: 6px; }
+    .recent-tag { color: var(--green); background: var(--mint); border-radius: 5px; padding: 2px 5px; font-size: .65rem; font-weight: 850; }
+    .quantity { display: inline-flex; align-items: center; gap: 7px; background: var(--paper); border-radius: 10px; padding: 3px; }
+    .quantity button { width: 24px; height: 24px; border: 0; border-radius: 7px; background: transparent; color: var(--green); font-weight: 850; }
+    .quantity button:hover { background: var(--mint); }
+    .quantity-value { min-width: 17px; text-align: center; font-size: .83rem; font-weight: 800; }
+    .delete-btn { border: 0; background: transparent; color: #a3ada6; width: 27px; height: 27px; border-radius: 8px; font-size: 1.1rem; line-height: 1; margin-left: 3px; }
+    .delete-btn:hover { background: #fde9e4; color: var(--coral); }
+    .empty-state { color: var(--muted); background: transparent; border: 1px dashed #cdd8ce; border-radius: 16px; padding: 26px 18px; text-align: center; line-height: 1.5; }
+    .empty-state strong { display: block; color: var(--ink); margin-bottom: 3px; }
+
+    .activity { border-top: 1px solid var(--line); padding-top: 24px; }
+    .activity-list { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 9px; }
+    .activity-card { display: flex; align-items: center; gap: 10px; border: 1px solid var(--line); background: rgba(255,255,255,.65); border-radius: 14px; padding: 11px 12px; }
+    .activity-icon { display: grid; place-items: center; flex: 0 0 30px; height: 30px; border-radius: 10px; background: var(--mint); color: var(--green); font-weight: 900; }
+    .activity-card p { margin: 0; font-size: .84rem; font-weight: 750; }
+    .activity-card small { color: var(--muted); display: block; margin-top: 3px; font-size: .72rem; }
+    .clear-btn { border: 0; padding: 4px 0; background: transparent; color: var(--coral); font-size: .8rem; font-weight: 800; }
+    .clear-btn:hover { text-decoration: underline; }
+
+    @media (min-width: 700px) {
+      .app-shell { padding: 34px 32px 70px; }
+      .hero { grid-template-columns: 1fr 260px; align-items: end; }
+      .content-grid { grid-template-columns: minmax(0, 1fr) 300px; align-items: start; }
+      .activity { border-top: 0; border-left: 1px solid var(--line); padding: 0 0 0 27px; }
+      .activity-list { grid-template-columns: 1fr; }
+      .add-panel { padding: 16px; }
+    }
+    @media (max-width: 420px) {
+      .item { grid-template-columns: auto 1fr; }
+      .item-actions { grid-column: 2; justify-self: end; margin-top: -5px; }
+    }
+  </style>
+</head>
+<body>
+  <main class="app-shell">
+    <header class="topbar">
+      <div class="brand"><span class="brand-mark" aria-hidden="true"></span><span>CartTogether</span></div>
+      <div class="list-status" id="listStatus">0 items left</div>
+    </header>
+
+    <section class="hero" aria-labelledby="page-title">
+      <div>
+        <p class="eyebrow">The shared grocery list</p>
+        <h1 id="page-title">A better cart starts together.</h1>
+        <p class="hero-copy">Keep the essentials moving, one thoughtful grocery run at a time.</p>
+      </div>
+      <aside class="hero-note"><strong>Small win for today</strong><span id="tipText">Add the thing you nearly forgot.</span></aside>
+    </section>
+
+    <section class="add-panel" aria-label="Add a grocery item">
+      <form id="addForm">
+        <div class="add-row">
+          <input id="itemInput" name="item" type="text" maxlength="60" autocomplete="off" placeholder="What do we need?" aria-label="Item name" required>
+          <button class="primary-btn" type="submit">Add item</button>
+        </div>
+        <div class="add-options">
+          <label><span class="field-label">Category</span><select id="categoryInput" aria-label="Item category"></select></label>
+          <label><span class="field-label">Quantity</span><select id="quantityInput" aria-label="Item quantity"><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="10">10</option></select></label>
+        </div>
+      </form>
+    </section>
+
+    <div class="content-grid">
+      <section aria-labelledby="list-heading">
+        <div class="section-heading"><h2 id="list-heading">This week's list</h2><button class="clear-btn" id="clearButton" type="button">Clear completed</button></div>
+        <div id="groceryList"></div>
+      </section>
+      <aside class="activity" aria-labelledby="activity-heading">
+        <div class="section-heading"><h2 id="activity-heading">Recently added</h2><span id="activityCount">0 items</span></div>
+        <div class="activity-list" id="activityList"></div>
+      </aside>
+    </div>
+  </main>
+
+  <script>
+    const categories = [
+      { name: 'Produce', color: '#58a56e' },
+      { name: 'Dairy', color: '#78a9c4' },
+      { name: 'Meat', color: '#cc7770' },
+      { name: 'Frozen', color: '#6a9bc2' },
+      { name: 'Household', color: '#c99b43' },
+      { name: 'Other', color: '#9a86ae' }
+    ];
+    const storageKey = 'carttogether-items-v1';
+    const tipText = document.getElementById('tipText');
+    const tips = ['Add the thing you nearly forgot.', 'A list shared is a list halved.', 'Future you says thanks.', 'One less errand to remember.'];
+    tipText.textContent = tips[new Date().getDate() % tips.length];
+
+    const seedItems = [
+      { id: crypto.randomUUID(), name: 'Avocados', category: 'Produce', quantity: 2, done: false, addedAt: Date.now() - 1000 * 60 * 18 },
+      { id: crypto.randomUUID(), name: 'Oat milk', category: 'Dairy', quantity: 1, done: false, addedAt: Date.now() - 1000 * 60 * 60 * 3 },
+      { id: crypto.randomUUID(), name: 'Dish soap', category: 'Household', quantity: 1, done: true, addedAt: Date.now() - 1000 * 60 * 60 * 20, completedAt: Date.now() - 1000 * 60 * 40 }
+    ];
+    let items = loadItems();
+
+    function loadItems() {
+      try {
+        const saved = JSON.parse(localStorage.getItem(storageKey));
+        return Array.isArray(saved) ? saved : seedItems;
+      } catch (error) { return seedItems; }
+    }
+    function saveItems() { localStorage.setItem(storageKey, JSON.stringify(items)); }
+    function escapeHtml(value) { return value.replace(/[&<>'"]/g, character => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#039;', '"': '&quot;' }[character])); }
+    function relativeTime(timestamp) {
+      const minutes = Math.max(1, Math.round((Date.now() - timestamp) / 60000));
+      if (minutes < 60) return `${minutes}m ago`;
+      const hours = Math.round(minutes / 60);
+      if (hours < 24) return `${hours}h ago`;
+      return `${Math.round(hours / 24)}d ago`;
+    }
+    function isRecent(item) { return Date.now() - item.addedAt < 1000 * 60 * 60 * 24; }
+
+    function render() {
+      const list = document.getElementById('groceryList');
+      const openCount = items.filter(item => !item.done).length;
+      document.getElementById('listStatus').textContent = `${openCount} item${openCount === 1 ? '' : 's'} left`;
+      document.getElementById('clearButton').style.visibility = items.some(item => item.done) ? 'visible' : 'hidden';
+      list.innerHTML = '';
+
+      categories.forEach(category => {
+        const categoryItems = items.filter(item => item.category === category.name);
+        if (!categoryItems.length) return;
+        const section = document.createElement('section');
+        section.className = 'category';
+        section.innerHTML = `<h3 class="category-title" style="--category-color:${category.color}">${category.name}<span>(${categoryItems.length})</span></h3><ul class="item-list"></ul>`;
+        const listElement = section.querySelector('.item-list');
+        categoryItems.sort((a, b) => Number(a.done) - Number(b.done) || b.addedAt - a.addedAt).forEach(item => listElement.appendChild(itemTemplate(item)));
+        list.appendChild(section);
+      });
+      if (!items.length) list.innerHTML = '<div class="empty-state"><strong>Your cart is wonderfully empty.</strong>Start by adding something you need.</div>';
+      renderActivity();
+    }
+
+    function itemTemplate(item) {
+      const row = document.createElement('li');
+      row.className = `item${item.done ? ' is-done' : ''}`;
+      row.dataset.id = item.id;
+      row.innerHTML = `<button class="check-btn" type="button" aria-label="${item.done ? 'Mark incomplete' : 'Mark complete'} ${escapeHtml(item.name)}"></button><div class="item-main"><span class="item-name">${escapeHtml(item.name)}</span><span class="item-meta">${escapeHtml(item.category)} ${isRecent(item) && !item.done ? '<span class="recent-tag">NEW</span>' : ''}</span></div><div class="item-actions"><span class="quantity"><button type="button" data-action="decrease" aria-label="Decrease quantity">-</button><span class="quantity-value">${item.quantity}</span><button type="button" data-action="increase" aria-label="Increase quantity">+</button></span><button class="delete-btn" type="button" data-action="delete" aria-label="Delete ${escapeHtml(item.name)}">&times;</button></div>`;
+      row.querySelector('.check-btn').addEventListener('click', () => toggleItem(item.id));
+      row.querySelector('.delete-btn').addEventListener('click', () => deleteItem(item.id));
+      row.querySelector('[data-action="decrease"]').addEventListener('click', () => changeQuantity(item.id, -1));
+      row.querySelector('[data-action="increase"]').addEventListener('click', () => changeQuantity(item.id, 1));
+      return row;
+    }
+
+    function renderActivity() {
+      const activity = document.getElementById('activityList');
+      const recent = [...items].sort((a, b) => (b.completedAt || b.addedAt) - (a.completedAt || a.addedAt)).slice(0, 4);
+      document.getElementById('activityCount').textContent = `${recent.length} item${recent.length === 1 ? '' : 's'}`;
+      activity.innerHTML = recent.length ? recent.map(item => `<div class="activity-card"><span class="activity-icon">${item.done ? '✓' : '+'}</span><div><p>${escapeHtml(item.name)}</p><small>${item.done ? 'Bought' : 'Added'} ${relativeTime(item.completedAt || item.addedAt)}</small></div></div>`).join('') : '<div class="empty-state">Your activity will appear here.</div>';
+    }
+
+    function toggleItem(id) {
+      items = items.map(item => item.id === id ? { ...item, done: !item.done, completedAt: !item.done ? Date.now() : null } : item);
+      saveItems(); render();
+    }
+    function changeQuantity(id, amount) {
+      items = items.map(item => item.id === id ? { ...item, quantity: Math.max(1, Math.min(99, item.quantity + amount)) } : item);
+      saveItems(); render();
+    }
+    function deleteItem(id) { items = items.filter(item => item.id !== id); saveItems(); render(); }
+
+    document.getElementById('categoryInput').innerHTML = categories.map(category => `<option value="${category.name}">${category.name}</option>`).join('');
+    document.getElementById('addForm').addEventListener('submit', event => {
+      event.preventDefault();
+      const input = document.getElementById('itemInput');
+      const name = input.value.trim();
+      if (!name) return;
+      items.unshift({ id: crypto.randomUUID(), name, category: document.getElementById('categoryInput').value, quantity: Number(document.getElementById('quantityInput').value), done: false, addedAt: Date.now() });
+      saveItems(); render(); input.value = ''; input.focus();
+    });
+    document.getElementById('clearButton').addEventListener('click', () => { items = items.filter(item => !item.done); saveItems(); render(); });
+    render();
+  </script>
+</body>
+</html>
