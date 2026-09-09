@@ -241,7 +241,39 @@
       const input = document.getElementById('itemInput');
       const name = input.value.trim();
       if (!name) return;
-      items.unshift({ id: crypto.randomUUID(), name, category: document.getElementById('categoryInput').value, quantity: Number(document.getElementById('quantityInput').value), done: false, addedAt: Date.now() });
+      const category = document.getElementById('categoryInput').value;
+
+const quantity = Number(document.getElementById('quantityInput').value) || 1;
+
+const existing = items.find(
+
+  item => item.name.trim().toLowerCase() === name.toLowerCase()
+
+);
+
+if (existing) {
+
+  existing.quantity = (Number(existing.quantity) || 1) + quantity;
+
+  existing.addedAt = Date.now();
+
+} else {
+
+  items.unshift({
+
+    id: crypto.randomUUID(),
+
+    name,
+
+    category,
+
+    quantity,
+
+    done: false,
+
+    addedAt: Date.now()
+
+  });
       saveItems(); render(); input.value = ''; input.focus();
     });
     document.getElementById('clearButton').addEventListener('click', () => { items = items.filter(item => !item.done); saveItems(); render(); });
